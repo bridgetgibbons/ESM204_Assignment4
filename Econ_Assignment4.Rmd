@@ -1,0 +1,23 @@
+---
+title: "Econ_Assignment4"
+author: "Bridget Gibbons"
+date: "6/3/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r packages, include = FALSE}
+
+library(tidyverse)
+
+```
+
+```{r data}
+
+data <- read_csv("HW4Data.csv")
+
+```
+
