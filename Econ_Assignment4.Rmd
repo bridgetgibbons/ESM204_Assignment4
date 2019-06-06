@@ -9,14 +9,14 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}
+```{r, include=FALSE}
 
 library(tidyverse)
 
 ```
 
 
-```{r}
+```{r, include=FALSE}
 
 climate_raw <- read_csv("HW4Data.csv")
 
@@ -24,7 +24,7 @@ climate_raw <- read_csv("HW4Data.csv")
 
 1. 
 
-```{r}
+```{r, echo=FALSE}
 
 lm_a <- lm(MC_A ~ Abatement, data = climate_raw)
 
@@ -51,7 +51,6 @@ all_model_plot <- ggplot(climate_raw, aes(x = Abatement)) +
 
 all_model_plot
 
-
 ```
 
 As long as carbon credits are more expensive than this, they will abate
@@ -77,7 +76,7 @@ Then, use new y-intercept and x-intercept at full emissions levels to derive slo
 (0, 160.78757); (220, 0) -> slope = -0.73085259
 (0, 87.66651); (300, 0) -> slope = -0.2922217
 
-```{r}
+```{r, echo=FALSE}
 slope_a <- -0.5288151111
 slope_b <- -0.2453285
 slope_c <- -0.73085259
