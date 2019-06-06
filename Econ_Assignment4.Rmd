@@ -12,6 +12,8 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r, include=FALSE}
 
 library(tidyverse)
+library(janitor)
+library(stargazer)
 
 ```
 
@@ -38,7 +40,23 @@ summary(lm_a)
 summary(lm_b)
 summary(lm_c)
 summary(lm_d)
+```
 
+```{r}
+
+slope_a <- lm_a$coefficients[2]
+slope_b <- lm_b$coefficients[2]
+slope_c <- lm_c$coefficients[2]
+slope_d <- lm_d$coefficients[2]
+
+intercept_a <- lm_a$coefficients[1]
+intercept_b <- lm_b$coefficients[1]
+intercept_c <- lm_c$coefficients[1]
+intercept_d <- lm_d$coefficients[1]
+```
+
+
+```{r}
 all_model_plot <- ggplot(climate_raw, aes(x = Abatement)) +
   geom_smooth(aes(y = MC_A), method = lm, se = TRUE, size = 0.5, color = "red")+
   geom_smooth(aes(y = MC_B), method = lm, se = TRUE, size = 0.5, color = "green")+
@@ -77,15 +95,15 @@ Then, use new y-intercept and x-intercept at full emissions levels to derive slo
 (0, 87.66651); (300, 0) -> slope = -0.2922217
 
 ```{r, echo=FALSE}
-slope_a <- -0.5288151111
-slope_b <- -0.2453285
-slope_c <- -0.73085259
-slope_d <- -0.2922217
+demand_slope_a <- -0.5288151111
+demand_slope_b <- -0.2453285
+demand_slope_c <- -0.73085259
+demand_slope_d <- -0.2922217
 
-yint_a <- 95.18672
-yint_b <- 49.0657
-yint_c <- 160.78757
-yint_d <- 87.66651
+demand_yint_a <- 95.18672
+demand_yint_b <- 49.0657
+demand_yint_c <- 160.78757
+demand_yint_d <- 87.66651
 
 ```
 
@@ -111,15 +129,15 @@ a. Cap on carbon. Each sector (A, B, and C) must cut its carbon emissions by 100
 
 abate<-c(100, 100, 100, 300)
 
-MCa<-(slope_a*100) + yint_a 
-MCb<-(slope_b*100) + yint_b
-MCc<-(slope_c*100) + yint_c
+MCa<-(demand_slope_a*100) + demand_yint_a 
+MCb<-(demand_slope_b*100) + demand_yint_b
+MCc<-(demand_slope_c*100) + demand_yint_c
 
 MC<-rbind(MCa, MCb, MCc, NA)
 
-costa<-(MCa*100)+(100*(yint_a-MCa)*0.5)
-costb<-(MCb*100)+(100*(yint_b-MCb)*0.5)
-costc<-(MCc*100)+(100*(yint_c-MCc)*0.5)
+costa<-(MCa*100)+(100*(demand_yint_a-MCa)*0.5)
+costb<-(MCb*100)+(100*(demand_yint_b-MCb)*0.5)
+costc<-(MCc*100)+(100*(demand_yint_c-MCc)*0.5)
 
 totalcost<-sum(costa, costb, costc)
 

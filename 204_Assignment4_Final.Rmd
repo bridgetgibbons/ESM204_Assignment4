@@ -1,0 +1,534 @@
+---
+title: "204_Assignment4_final"
+author: "Bridget Gibbons, BR Hoover"
+date: "6/6/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(janitor)
+library(stargazer)
+```
+
+```{r, include=FALSE}
+#read in data
+
+carbon <- read_csv("HW4Data.csv") %>%
+  clean_names()
+
+```
+
+1. Write down a plausible functional form for the marginal cost of abatement for sector A. Use regression analysis to estimate the parameters of that function. Repeating this for sectors B, C, and D will give you a model of the marginal cost of abatement function for each sector. How well do your models fit the data for each sector? You may need to experiment with different functional forms. Produce a plot of the estimated marginal abatement cost functions in all four sectors (this plot should go in your memo).
+
+```{r, include = FALSE}
+
+carbon_tidy <- gather(carbon, sector, mc, mc_a:mc_d) %>%
+  mutate(sector = case_when(
+    sector == "mc_a" ~ "Sector A",
+    sector == "mc_b" ~ "Sector B",
+    sector == "mc_c" ~ "Sector C",
+    sector == "mc_d" ~ "Sector D"
+  ))
+
+#use regression to determine marginal cost of abatement
+lm_a <- lm(data = carbon, mc_a ~ abatement) 
+summary(lm_a)
+# mc_a = -8.64448 + 0.57684*abatement
+
+lm_b <- lm(data = carbon, mc_b ~ abatement) 
+summary(lm_b)
+# mc_b = 9.31770 + 0.19874*abatement
+
+lm_c <- lm(data = carbon, mc_c ~ abatement) 
+summary(lm_c)
+# mc_c = -11.65503 + 0.78383*abatement
+
+lm_d <- lm(data = carbon, mc_d ~ abatement) 
+summary(lm_d)
+# mc_d = 9.68751 + 0.25993*abatement
+
+#store the slopes and intercepts for abatement curve
+slope_a <- lm_a$coefficients[2]
+slope_b <- lm_b$coefficients[2]
+slope_c <- lm_c$coefficients[2]
+slope_d <- lm_d$coefficients[2]
+
+intercept_a <- lm_a$coefficients[1]
+intercept_b <- lm_b$coefficients[1]
+intercept_c <- lm_c$coefficients[1]
+intercept_d <- lm_d$coefficients[1]
+```
+
+```{r, echo = FALSE}
+stargazer(lm_a, lm_b, lm_c, lm_d, type="text", title="Abatement Regression Results")
+```
+
+
+```{r, echo = FALSE}
+## plot the data and regressions
+
+ggplot(data = carbon_tidy, aes(x=abatement, y = mc)) + geom_point() +
+  geom_smooth(method="lm", se = FALSE) +
+  facet_wrap(~sector, scales = "free") +
+  theme_bw() +
+  labs(x = "Abatement (tons)", y = "Marginal Cost", title = "Marginal Abatement Costs") 
+```
+
+Marginal Cost of Abatement Functions: 
+
+- $$MC_A= -8.65 + 0.58(Abatement)$$
+- $$MC_B= 9.32 + 0.2 (Abatement)$$
+- $$MC_C = -11.66 + 0.78 (Abatement)$$
+- $$MC_D = 9.69 + 0.26 (Abatement)$$
+
+2. Using these models and the current level of carbon emissions, derive each sector’s demand curve for carbon emissions. In other words, how much would each sector be willing to pay for the right to pollute the first unit, second unit, etc? Draw these demand curves on a graph. Which sector is willing to pay the most for the first unit of carbon emissions?
+
+```{r, include = FALSE}
+#make dataframe columns for abatement, carbon emissions A, MB_A, carbon emissions B, MB_B, carbon emissions C, MB_C, carbon emissions D, MB_D
+
+abatement <- seq(0,300,10)
+
+emissions_A <- seq(180,0, -10)
+marg_benefit <- merge(abatement, emissions_A, by = "row.names", all = TRUE) %>%
+  select(-Row.names) %>%
+  rename(abatement = x, emissions_A = y) %>%
+  arrange(abatement)
+
+emissions_B <- seq(200, 0, -10)
+marg_benefit <- merge(marg_benefit, emissions_B, by = "row.names", all = TRUE) %>%
+  select(-Row.names) %>%
+  rename(emissions_B = y) %>%
+  arrange(abatement)
+
+emissions_C <- seq(220, 0 , -10)
+  marg_benefit <- merge(marg_benefit, emissions_C, by = "row.names", all = TRUE) %>%
+  select(-Row.names) %>%
+  rename(emissions_C = y) %>%
+  arrange(abatement)
+
+emissions_D <- seq(300, 0 , -10)
+marg_benefit <- merge(marg_benefit, emissions_D, by = "row.names", all = TRUE) %>%
+  select(-Row.names) %>%
+  rename(emissions_D = y) %>%
+  arrange(abatement)
+
+#make the demand function for a 
+demand_A_fn <- function(x){
+  slope_a*(x) + intercept_a #180 is the x intercept, has the same slope because it is just the inverse 
+}
+#evalute demand function at each value for emissions_A
+abatement_A <- seq(0,180, 10)
+demand_A <- demand_A_fn(abatement_A) 
+marg_benefit <- merge(marg_benefit, demand_A, by = "row.names", all = TRUE) %>%
+  select(-Row.names) %>%
+  rename(demand_A = y) %>%
+  arrange(abatement)
+#95.2 is the y intercept 
+
+demand_B_fn <- function(x){
+  slope_b*(x) + intercept_b
+}
+abatement_B <- seq(0,200,10)
+demand_B <- demand_B_fn(abatement_B)
+marg_benefit <- merge(marg_benefit, demand_B, by = "row.names", all = TRUE) %>%
+  select(-Row.names) %>%
+  rename(demand_B = y) %>%
+  arrange(abatement)
+
+demand_C_fn <- function(x){
+  slope_c*(x) + intercept_c
+}
+abatement_C <- seq(0,220,10)
+demand_C <- demand_C_fn(abatement_C)
+marg_benefit <- merge(marg_benefit, demand_C, by = "row.names", all = TRUE) %>%
+  select(-Row.names) %>%
+  rename(demand_C = y) %>%
+  arrange(abatement)
+
+demand_D_fn <- function(x){
+  slope_d*(x) + intercept_d
+}
+abatement_D <- seq(0,300,10)
+demand_D <- demand_D_fn(abatement_D)
+marg_benefit <- merge(marg_benefit, demand_D, by = "row.names", all = TRUE) %>%
+  select(-Row.names) %>%
+  rename(demand_D = y) %>%
+  arrange(abatement)
+```
+
+```{r, echo = FALSE}
+#plot
+par(mfrow=c(2,2)) 
+plot(marg_benefit$emissions_A, marg_benefit$demand_A, main = "Sector A", xlab = "Pollution Emitted (Tons)", ylab = "Marginal Benefit ($/Ton)", type = "l", col = "red")
+plot(marg_benefit$emissions_B, marg_benefit$demand_B, main = "Sector B", xlab = "Pollution Emitted (Tons)", ylab = "Marginal Benefit ($/Ton)", type = "l", col = "orange")
+plot(marg_benefit$emissions_C, marg_benefit$demand_C, main = "Sector C", xlab = "Pollution Emitted (Tons)", ylab = "Marginal Benefit ($/Ton)", type = "l", col = "green")
+plot(marg_benefit$emissions_D, marg_benefit$demand_D, main = "Sector D", xlab = "Pollution Emitted (Tons)", ylab = "Marginal Benefit ($/Ton)", type = "l", col = "blue")
+```
+
+Demand for emission functions:
+$$Demand_A = -0.58(Emissions) + 95.19 $$
+$$Demand_B = -0.2(Emissions) + 49.07 $$
+$$Demand_C =-0.78(Emissions) + 160.79 $$
+$$Demand_D = -0.26 (Emissions)+ 87.67 $$
+
+Sector C has the highest willingnesss to pay for the first unit of carbon emissions at $160.7868 per ton. 
+ 
+ 3. Now focus on country X (which contains sectors A, B, and C). Assume there are no “co-benefits” from carbon abatement (i.e. that there are no local pollutants that are affected by carbon abatement). Suppose to meet the Paris Accord commitments, country X needs to cut all carbon emissions in half. For each of the policy options listed below, derive: (1) the total cost of meeting the target in country X, (2) the cost (or benefit) to each sector, and (3) the tax revenue generated.
+  a. Cap on carbon. Each sector (A, B, and C) must cut its carbon emissions by 100 tons (thus reducing total emissions from 600 down to 300).
+  b. Tax on carbon. To emit a ton of carbon in country X, you must pay a tax of $t. You will need to find the tax that accomplishes the desired reduction.
+  c. Cap and trade. Each sector (A, B, C) is allocated carbon permits equal to their current emissions minus 100 (same as in (a) above), thus achieving the total reduction of 300. Then, these three sectors are allowed to trade with each other. You will need to derive the outcome of that trading.
+
+```{r, include = FALSE}
+#cap on carbon
+#save y intercepts for demand curves 
+demand_a_int <- marg_benefit$demand_A[marg_benefit$abatement == 180]
+demand_b_int <- marg_benefit$demand_B[marg_benefit$abatement == 200]
+demand_c_int <- marg_benefit$demand_C[marg_benefit$abatement == 220]
+demand_d_int <- marg_benefit$demand_D[marg_benefit$abatement == 300]
+
+marg_benefit_ag <- data.frame(marg_benefit_pollution = seq(161, 0 , -1)) %>%
+  mutate(emissions_A = ifelse(
+    marg_benefit_pollution <= demand_a_int, (demand_a_int - marg_benefit_pollution)/slope_a, 0 
+    ), 
+    emissions_B = ifelse(
+    marg_benefit_pollution <= demand_b_int, (demand_b_int - marg_benefit_pollution)/slope_b, 0 
+    ), 
+    emissions_C = ifelse(
+    marg_benefit_pollution <= demand_c_int, (demand_c_int - marg_benefit_pollution)/slope_c, 0 
+    ), 
+    emissions_D = ifelse(
+    marg_benefit_pollution <= demand_d_int, (demand_d_int - marg_benefit_pollution)/slope_d, 0 
+    )) %>%
+  mutate(ag_country_X = emissions_A + emissions_B + emissions_C)
+
+#em_A
+em_A_fn <- function(price){
+  -price/slope_a + demand_a_int/slope_a
+  
+}
+em_slope_a <- -1/slope_a
+em_int_a <- demand_a_int/slope_a
+
+#em_B
+em_B_fn <- function(price){
+  -price/slope_b + demand_b_int/slope_b
+  
+}
+em_slope_b <- -1/slope_b
+em_int_b <- demand_b_int/slope_b
+
+#em_C
+em_C_fn <- function(price){
+  -price/slope_c + demand_c_int/slope_c
+  
+}
+em_slope_c <- -1/slope_c
+em_int_c <- demand_c_int/slope_c
+
+#em_D
+em_D_fn <- function(price){
+  
+  -price/slope_d + demand_d_int/slope_d
+}
+em_slope_d <- -1/slope_d
+em_int_d <- demand_d_int/slope_d
+#em_ag 
+em_slope_ag <- em_slope_a+em_slope_b+em_slope_c
+em_int_ag <- em_int_a + em_int_b + em_int_c
+em_ag_fn <- function(price){
+  price*em_slope_ag + em_int_ag
+  
+}
+price_slope_ag <- function(emissions){
+  -em_int_ag/em_slope_ag + emissions/em_slope_ag
+  
+} 
+tax <- price_slope_ag(300)
+```
+
+```{r}
+#cap on carbon part a 
+demand_A_fn_fixed <- function(x){
+  -slope_a*(x) + demand_a_int 
+}
+demand_B_fn_fixed <- function(x){
+  -slope_b*(x) + demand_b_int 
+}
+demand_C_fn_fixed <- function(x){
+  -slope_c*(x) + demand_c_int 
+}
+
+polluted_units_C <- 120 #polluted units for sector C
+polluted_units_B <- 100 #polluted units for sector B
+polluted_units_A <- 80 #polluted units for sector A
+
+abated_units_A <- 100 #abated units for sector A
+abated_units_B <- 100 #abated units for sector B
+abated_units_C <- 100 #abated units for sector C
+
+##C NUMBERS WITHOUT TAX
+pollution_benefit_C <- 120*demand_C_fn_fixed(120) + 0.5*(demand_c_int - demand_C_fn_fixed(120))*120
+#13650.87 
+total_benefit_C <- integrate(demand_C_fn_fixed, 0 , 220)$value
+abatement_cost_C <- total_benefit_C - pollution_benefit_C
+#2753.63 
+
+#A NUMBERS WITHOUT TAX
+pollution_benefit_A <- 80*demand_A_fn_fixed(80) + 0.5*(demand_a_int - demand_A_fn_fixed(80))*80
+#5769.071
+total_benefit_A <- integrate(demand_A_fn_fixed, 0 , 180)$value
+abatement_cost_A <- total_benefit_A - pollution_benefit_A
+#2019.762 
+
+#B NUMBERS WITHOUT TAX
+pollution_benefit_B <- 100*demand_B_fn_fixed(100) + 0.5*(demand_b_int - demand_B_fn_fixed(100))*100
+#3912.934
+total_benefit_B <- integrate(demand_B_fn_fixed, 0 , 200)$value
+abatement_cost_B <- total_benefit_B - pollution_benefit_B
+#1925.491 
+
+######### Aggregated Costs and Benefits #########
+abatement_cost_aggregated <- abatement_cost_A + abatement_cost_B + abatement_cost_C
+#6698.883
+pollution_benefit_aggregated <- pollution_benefit_A + pollution_benefit_B + pollution_benefit_C
+#23332.87 
+```
+
+
+```{r, echo = FALSE}
+par(mfrow=c(2,2)) 
+plot(marg_benefit_ag$ag_country_X, marg_benefit_ag$marg_benefit_pollution, main = "Aggregate Marginal Benefits for Country X", xlab = "Pollution Emitted (Tons)", ylab = "Marginal Benefit ($/Ton)", type = "l", col = "red")
+plot(marg_benefit$emissions_A, marg_benefit$demand_A, main = "Sector A", xlab = "Pollution Emitted (Tons)", ylab = "Marginal Benefit ($/Ton)", type = "l", col = "green")
+plot(marg_benefit$emissions_B, marg_benefit$demand_B, main = "Sector B", xlab = "Pollution Emitted (Tons)", ylab = "Marginal Benefit ($/Ton)", type = "l", col = "blue")
+plot(marg_benefit$emissions_C, marg_benefit$demand_C, main = "Sector C", xlab = "Pollution Emitted (Tons)", ylab = "Marginal Benefit ($/Ton)", type = "l", col = "orange")
+```
+
+```{r, echo = FALSE}
+plot(marg_benefit_ag$ag_country_X, marg_benefit_ag$marg_benefit_pollution, main = "Aggregate Marginal Benefits for Country X", xlab = "Pollution Emitted (Tons)", ylab = "Marginal Benefit ($/Ton)", type = "l", col = "red")
+lines(marg_benefit$emissions_A, marg_benefit$demand_A, main = "Sector A", xlab = "Pollution Emitted (Tons)", ylab = "Marginal Benefit ($/Ton)", type = "l", col = "green")
+lines(marg_benefit$emissions_B, marg_benefit$demand_B, main = "Sector B", xlab = "Pollution Emitted (Tons)", ylab = "Marginal Benefit ($/Ton)", type = "l", col = "blue")
+lines(marg_benefit$emissions_C, marg_benefit$demand_C, main = "Sector C", xlab = "Pollution Emitted (Tons)", ylab = "Marginal Benefit ($/Ton)", type = "l", col = "orange")
+abline(h=tax, lty= 2)
+```
+
+
+```{r}
+#3b 
+polluted_units_C_tax <- em_C_fn(tax) #polluted units for sector C
+#154.830468933185 
+
+polluted_units_B_tax <- em_B_fn(tax) #polluted units for sector B
+#48.5044240323858 
+
+polluted_units_A_tax <- em_A_fn(tax) #polluted units for sector A
+#96.6651070344293
+
+abated_units_A_tax <- (intercept_a - tax)/ -slope_a #abated units for sector A
+#83.3348929655707 
+
+abated_units_B_tax <- (intercept_b - tax)/ -slope_b #abated units for sector B
+#151.495575967614 
+
+abated_units_C_tax <- (intercept_c - tax)/ -slope_c #abated units for sector C
+#65.169531066815 
+
+##C NUMBERS W TAX
+pollution_benefit_C_tax <- polluted_units_C_tax*tax + 0.5*polluted_units_C_tax*(demand_c_int-tax)
+#15499.57
+total_benefit_C_tax <- integrate(demand_C_fn, 0 , 220)$value
+abatement_cost_C_tax <- total_benefit_C - pollution_benefit_C
+#904.9294 
+
+#A NUMBERS WITH TAX
+pollution_benefit_A_tax <- polluted_units_A_tax*tax + 0.5*polluted_units_A_tax*(demand_a_int-tax)
+#6506.221 
+total_benefit_A_tax <- integrate(demand_A_fn, 0 , 180)$value
+abatement_cost_A_tax <- total_benefit_A - pollution_benefit_A
+#1282.612 
+
+#B NUMBERS WITH TAX
+pollution_benefit_B_tax <- polluted_units_B_tax*tax + 0.5*polluted_units_B_tax*(demand_b_int-tax)
+#2146.154
+total_benefit_B_tax <- integrate(demand_B_fn, 0 , 200)$value
+abatement_cost_B_tax <- total_benefit_B - pollution_benefit_B
+#3692.271 
+
+######### Aggregated Costs and Benefits #########
+abatement_cost_aggregated_tax <- abatement_cost_A_tax + abatement_cost_B_tax + abatement_cost_C_tax
+#5879.812
+
+pollution_benefit_aggregated_tax <- pollution_benefit_A + pollution_benefit_B + pollution_benefit_C
+#24151.94 
+
+tax_revenue_A <- tax*polluted_units_A_tax
+#3811.175
+
+tax_revenue_B <- tax*polluted_units_B_tax
+#1912.364 
+
+tax_revenue_C <- tax*polluted_units_C_tax
+#6104.436
+
+tax_revenue <- tax_revenue_A + tax_revenue_B + tax_revenue_C
+#11827.97
+```
+
+```{r}
+#3c 
+#B will sell because they get the least benefit from emitting
+#A and C will buy because they get more benefit from emitting
+# C will buy the most because they have the highest benefit from emitting one more unit. 
+
+trading_price <- tax
+
+a_buys <- 80 - em_A_fn(tax)
+#-16.66511 
+
+b_sells <- 100 - em_B_fn(trading_price)
+#51.49558 
+
+c_buys <- 120 - em_C_fn(tax)
+#-34.83047 
+
+c_loses <- -c_buys*tax
+#1373.246 
+
+b_gains <- b_sells*tax
+#2030.294
+
+a_loses <- -a_buys*tax
+#657.0482 
+
+polluted_units_A_cap <- polluted_units_A_tax
+#96.66511 
+polluted_units_B_cap <- polluted_units_B_tax
+#48.50442
+polluted_units_C_cap <- polluted_units_C_tax
+#154.8305 
+
+abated_units_A_cap <- (intercept_a - tax)/ -slope_a #abated units for sector A
+#83.3348929655707 
+abated_units_B_cap <- (intercept_b - tax)/ -slope_b #abated units for sector B
+#151.495575967614 
+abated_units_C_cap <- (intercept_c - tax)/ -slope_c #abated units for sector C
+#65.169531066815 
+
+# all values stay the same except for the trading units 
+```
+
+4. Again, without any co-benefits, suppose that country Y (which only has one carbon-emitting sector, D) has no obligation to reduce its emissions. Country X asks country Y to enter the country X carbon market. Doing so would require country Y to put a cap on carbon emissions at its current level of emissions (300 tons), but would then allow country Y to sell carbon offsets to sectors A, B, or C. Are there any incentives for country Y to enter country X’s carbon market and to thus place a voluntary cap on its emissions? Are there any incentives for country X to try to attract country Y into its market?
+
+
+```{r}
+#4
+
+#em_ag 
+em_slope_ag_D <- em_slope_a+em_slope_b+em_slope_c + em_slope_d
+em_int_ag_D <- em_int_a + em_int_b + em_int_c + em_int_d
+em_ag_fn_D <- function(price){
+  price*em_slope_ag_D + em_int_ag_D
+  
+}
+price_slope_ag_D <- function(emissions){
+  -em_int_ag_D/em_slope_ag_D + emissions/em_slope_ag_D
+  
+} 
+
+tax_D <- price_slope_ag_D(600)
+
+polluted_units_D_4 <- em_D_fn(tax_D)
+#222.6131 
+polluted_units_C_4 <- em_C_fn(tax_D) #polluted units for sector C
+#167.1088
+polluted_units_B_4 <- em_B_fn(tax_D) #polluted units for sector B
+#96.92889 
+polluted_units_A_4 <- em_A_fn(tax_D) #polluted units for sector A
+#113.3492 
+
+abated_units_A_tax_4 <- (intercept_a - tax_D)/ -slope_a #abated units for sector A
+#66.65079 
+abated_units_B_tax_4 <- (intercept_b - tax_D)/ -slope_b #abated units for sector B
+#103.0711
+abated_units_C_tax_4 <- (intercept_c - tax_D)/ -slope_c #abated units for sector C
+#52.89119 
+abated_units_D_tax_4 <- (intercept_d - tax_D)/ -slope_d #abated units for sector D
+#77.3869
+
+##C NUMBERS W TAX AND SECTOR 4
+pollution_benefit_C_tax_4 <- polluted_units_C_4*tax_D + 0.5*polluted_units_C_4*(demand_c_int-tax_D)
+#15924.58 
+total_benefit_C_tax_4 <- integrate(demand_C_fn, 0 , 220)$value
+abatement_cost_C_tax_4 <- total_benefit_C_tax_4 - pollution_benefit_C_tax_4
+#479.9205
+
+#A NUMBERS WITH TAX AND SECTOR 4
+pollution_benefit_A_tax_4 <- polluted_units_A_4*tax_D + 0.5*polluted_units_A_4*(demand_a_int-tax_D)
+#7083.733 
+total_benefit_A_tax_4 <- integrate(demand_A_fn, 0 , 180)$value
+abatement_cost_A_tax_4 <- total_benefit_A_tax_4 - pollution_benefit_A_tax_4
+#705.0993 
+
+#B NUMBERS WITH TAX AND SECTOR 4 
+pollution_benefit_B_tax_4 <- polluted_units_B_4*tax_D + 0.5*polluted_units_B_4*(demand_b_int-tax_D)
+#2146.154
+total_benefit_B_tax_4 <- integrate(demand_B_fn, 0 , 200)$value
+abatement_cost_B_tax_4 <- total_benefit_B_tax_4 - pollution_benefit_B_tax_4
+#2016.081 
+
+#D NUMBERS WITH TAX AND SECTOR 4 
+pollution_benefit_D_tax_4 <- polluted_units_D_4*tax_D + 0.5*polluted_units_D_4*(demand_d_int-tax_D)
+#13074.99 
+total_benefit_D_tax_4 <- integrate(demand_D_fn, 0 , 300)$value
+abatement_cost_D_tax_4 <- total_benefit_D_tax_4 - pollution_benefit_D_tax_4
+#1528.004 
+
+######### Aggregated Costs and Benefits #########
+abatement_cost_aggregated_tax <- abatement_cost_A_tax_4 + abatement_cost_B_tax_4 + abatement_cost_C_tax_4 + abatement_cost_D_tax_4 
+#4729.105 
+
+pollution_benefit_aggregated_tax <- pollution_benefit_A_tax_4 + pollution_benefit_B_tax_4 + pollution_benefit_C_tax_4 + pollution_benefit_D_tax_4
+#39905.64 
+
+#### CAP N TRADE PORTION 
+trading_price_4 <- tax_D
+a_buys_4 <- 80 - em_A_fn(tax_D)
+#-33.34921 
+b_sells_4 <- 100 - em_B_fn(trading_price_4)
+#3.071108 
+c_buys_4 <- 120 - em_C_fn(tax_D)
+#-47.10881  
+d_sells <- 300 - em_D_fn(tax_D)
+#77.3869
+c_loses_4 <- -c_buys_4*tax_D
+#1403.96 
+b_gains_4 <- b_sells_4*tax_D
+#91.52668 
+a_loses_4 <- -a_buys_4*tax_D
+#993.8895
+d_gains_4 <- d_sells*tax_D
+#2306.323
+total_permit_rev_4 <- (d_gains_4 + b_gains_4) - (c_loses_4 + a_loses_4)
+```
+
+
+5. Now assume that every ton of carbon emissions creates 1 ton of local air pollution. Local air pollution causes economic damages (health, environmental, etc.), but only in the country in which it is emitted. Assume there are no local air pollution regulations in either country X or country Y. a. In a carbon cap and trade market that only covers sectors in country X, how much local air pollution would you expect in country X? In country Y? b. If country Y enters the carbon market for country X (as in question 4 above), how much local pollution will there be in country X and country Y? c. What advice can you give country X and country Y about the desirability of allowing international trade of carbon emissions credits?
+
+a. 
+Country X produces: 300 Tons of air pollution
+Country Y produces: 300 Tons of air pollution
+
+b. 
+```{r}
+country_x_5b <- polluted_units_A_4 + polluted_units_B_4 + polluted_units_C_4
+# 377.3869 
+country_y_5b <- polluted_units_D_4
+#222.6131 
+```
+
+c. allowing cap and trade will lead to an increase in the tons of air pollution in country x and decrease it in country y.
