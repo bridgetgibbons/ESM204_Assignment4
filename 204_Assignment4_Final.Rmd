@@ -7,10 +7,6 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-```
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(janitor)
 library(stargazer)
@@ -66,17 +62,12 @@ intercept_d <- lm_d$coefficients[1]
 ```
 
 ```{r, echo = FALSE}
-stargazer(lm_a, lm_b, lm_c, lm_d, type="text", title="Abatement Regression Results")
-```
-
-
-```{r, echo = FALSE}
-## plot the data and regressions
+## plot the data and regression models for each sector
 
 ggplot(data = carbon_tidy, aes(x=abatement, y = mc)) + geom_point() +
   geom_smooth(method="lm", se = FALSE) +
   facet_wrap(~sector, scales = "free") +
-  theme_bw() +
+  theme_light() +
   labs(x = "Abatement (tons)", y = "Marginal Cost", title = "Marginal Abatement Costs") 
 ```
 
@@ -107,7 +98,7 @@ marg_benefit <- merge(marg_benefit, emissions_B, by = "row.names", all = TRUE) %
   arrange(abatement)
 
 emissions_C <- seq(220, 0 , -10)
-  marg_benefit <- merge(marg_benefit, emissions_C, by = "row.names", all = TRUE) %>%
+marg_benefit <- merge(marg_benefit, emissions_C, by = "row.names", all = TRUE) %>%
   select(-Row.names) %>%
   rename(emissions_C = y) %>%
   arrange(abatement)
@@ -122,6 +113,7 @@ marg_benefit <- merge(marg_benefit, emissions_D, by = "row.names", all = TRUE) %
 demand_A_fn <- function(x){
   slope_a*(x) + intercept_a #180 is the x intercept, has the same slope because it is just the inverse 
 }
+
 #evalute demand function at each value for emissions_A
 abatement_A <- seq(0,180, 10)
 demand_A <- demand_A_fn(abatement_A) 
