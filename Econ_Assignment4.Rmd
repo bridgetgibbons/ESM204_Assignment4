@@ -22,8 +22,7 @@ climate_raw <- read_csv("HW4Data.csv")
 
 ```
 
-1. Write down a plausible functional form for the marginal cost of abatement for sector A. Use regression analysis to estimate the parameters of that function. Repeating this for sectors B, C, and D will give you a model of the marginal cost of abatement function for each sector. How well do your models fit the data for each sector? You may need to experiment with different functional forms. Produce a plot of the estimated marginal abatement cost functions in all four sectors (this plot should go in your
-memo).
+1. 
 
 ```{r}
 
@@ -62,7 +61,7 @@ Sector B: MC_abatement = 9.31770 + 0.19874x; B= 200
 Sector C: MC_abatement = 0.78383x - 11.65503; C = 220
 Sector D: MC_abatement = 9.68751 + 0.25993x; D = 300
 
-2. Using these models and the current level of carbon emissions, derive each sector’s demand curve for carbon emissions. In other words, how much would each sector be willing to pay for the right to pollute the first unit, second unit, etc? Draw these demand curves on a graph. Which sector is willing to pay the most for the first unit of carbon emissions?
+2. still need to graph these demand curves
 
 Plugging in the quantities of current emissions to find MC of abatement for each sector, to find the intercept of the demand curve:
 
@@ -78,6 +77,19 @@ Then, use new y-intercept and x-intercept at full emissions levels to derive slo
 (0, 160.78757); (220, 0) -> slope = -0.73085259
 (0, 87.66651); (300, 0) -> slope = -0.2922217
 
+```{r}
+slope_a <- -0.5288151111
+slope_b <- -0.2453285
+slope_c <- -0.73085259
+slope_d <- -0.2922217
+
+yint_a <- 95.18672
+yint_b <- 49.0657
+yint_c <- 160.78757
+yint_d <- 87.66651
+
+```
+
 Section A equation:
 
 $$MC_A = 95.18672 - 0.5288151111(emissions) $$
@@ -85,18 +97,130 @@ $$MC_B = 49.0657 - 0.2453285(emissions)$$
 $$MC_C = 160.78757 - 0.73085259(emissions)$$
 $$MC_D = 87.66651 - 0.2922217(emissions)$$
 
-3. Now focus on country X (which contains sectors A, B, and C). Assume there are no “co-benefits” from carbon abatement (i.e. that there are no local pollutants that are affected by carbon abatement). Suppose to meet the Paris Accord commitments, country X needs to cut all carbon emissions in half.
+Sector A is willing to pay 95.19 for first ton of emissions
+Sector B is willing to pay 49.07 for first ton of emissions
+Sector C is willing to pay 160.79 for first ton of emissions
+Sector D is willing to pay 87.67 for first ton of emissions
 
-For each of the policy options listed below, derive: 
+Sector C is willing to pay the most for the first unit of carbon emissions.
 
-(1) the total cost of meeting the target in country X,
-(2) the cost (or benefit) to each sector, and (3) the tax revenue generated.
+3. Suppose to meet the Paris Accord commitments, country X needs to cut all carbon emissions in half.
 
 a. Cap on carbon. Each sector (A, B, and C) must cut its carbon emissions by 100 tons (thus reducing total emissions from 600 down to 300).
 
+```{r, include=FALSE}
+
+abate<-c(100, 100, 100, 300)
+
+MCa<-(slope_a*100) + yint_a 
+MCb<-(slope_b*100) + yint_b
+MCc<-(slope_c*100) + yint_c
+
+MC<-rbind(MCa, MCb, MCc, NA)
+
+costa<-(MCa*100)+(100*(yint_a-MCa)*0.5)
+costb<-(MCb*100)+(100*(yint_b-MCb)*0.5)
+costc<-(MCc*100)+(100*(yint_c-MCc)*0.5)
+
+totalcost<-sum(costa, costb, costc)
+
+cost<-rbind(costa, costb, costc, totalcost)
+
+part3_a<- cbind(abate, MC, cost)
+colnames(part3_a)=c("Units abated","Marginal cost", "Cost")
+row.names(part3_a)=c("Sector A", "Sector B", "Sector C", "Total Country X")
+
+part3_a
+
+```
+
+There is no tax revenue because there is no tax.
+
 b. Tax on carbon. To emit a ton of carbon in country X, you must pay a tax of $t. You will need to find the tax that accomplishes the desired reduction.
 
+For sector a:
+```{r}
+#switch a slope and int to be in terms of q=
+a_demand_int1 <- (-yint_a/slope_a)
+a_demand_slope1 <- (1/slope_a)
+a_demand1 <- function(x){a_demand_int1 + a_demand_slope1*x}
+```
+
+for sector b:
+```{r}
+#b slope and int to be in terms of q=
+b_demand_int1 <- (-yint_b/slope_b)
+b_demand_slope1 <- (1/slope_b)
+b_demand1 <- function(x){b_demand_int1 + b_demand_slope1*x}
+```
+
+for sector c:
+```{r}
+#c slope and int to be in terms of q=
+c_demand_int1 <- (-yint_c/slope_c)
+c_demand_slope1 <- (1/slope_c)
+c_demand1 <- function(x){c_demand_int1 + c_demand_slope1*x}
+```
+
+```{r}
+#aggregate slope and intercept
+agg_demand_int <- sum(a_demand_int1,b_demand_int1,c_demand_int1)
+agg_demand_slope <- sum(a_demand_slope1, b_demand_slope1, c_demand_slope1)
+
+#back in terms of p=
+agg_demand_int1 <- (-agg_demand_int/agg_demand_slope)
+agg_demand_slope1 <- (1/agg_demand_slope)
+agg_demand_curve <- function(x){agg_demand_int1 + agg_demand_slope1*x}
+
+optimal_tax <- agg_demand_curve(300)
+```
+
+```{r}
+#emissions from sector A
+a_emissions_tax <- a_demand1(optimal_tax)
+#102.66 tons of CO2 
+
+#cost of reduction for sector A
+
+#emissions from sector B
+b_emissions_tax <- b_demand1(optimal_tax)
+#33.30
+
+#cost of reduction for sector B
+#original 
+
+#emissions from sector C
+c_emissions_tax <- c_demand1(optimal_tax)
+#164.04
+
+#cost of reduction for sector C
+
+```
+
+
 c. Cap and trade. Each sector (A, B, C) is allocated carbon permits equal to their current emissions minus 100 (same as in (a) above), thus achieving the total reduction of 300. Then, these three sectors are allowed to trade with each other. You will need to derive the outcome of that trading.
+
+```{r}
+#outcome of trading would result in the same amount of emissions as if a tax was imposed for each sector, the price of permits would be the same as the optimal tax
+
+#only difference is the benefit of abatement = (100-emissions_tax)*optimal_tax
+
+#benefit to A (will be a cost because they will end up emitting more than 100)
+a_benefit_trade <- (100-a_emissions_tax)*optimal_tax
+#-108.88
+
+#benefit to B (because they will emit less than 100 and sell extra permits)
+b_benefit_trade <- (100-b_emissions_tax)*optimal_tax
+#2727.99
+
+#benefit to C (will be a cost because they will end up emitting more than 1000)
+c_benefit_trade <- (100-c_emissions_tax)*optimal_tax
+#-2619.12
+
+#all benefits go to B, because they have the lowest MC of abatement they can benefit most from abating and trading credits
+```
+
+
 
 4. Again, without any co-benefits, suppose that country Y (which only has one carbon-emitting sector, D) has no obligation to reduce its emissions. Country X asks country Y to enter the country X carbon market. Doing so would require country Y to put a cap on carbon emissions at its current level of emissions (300 tons), but would then allow country Y to sell carbon offsets to sectors A, B, or C. Are there any incentives for country Y to enter country X’s carbon market and to thus place a voluntary cap
 on its emissions? Are there any incentives for country X to try to attract country Y into its market?
