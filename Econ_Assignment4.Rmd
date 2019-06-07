@@ -49,10 +49,10 @@ slope_b <- lm_b$coefficients[2]
 slope_c <- lm_c$coefficients[2]
 slope_d <- lm_d$coefficients[2]
 
-intercept_a <- lm_a$coefficients[1]
-intercept_b <- lm_b$coefficients[1]
-intercept_c <- lm_c$coefficients[1]
-intercept_d <- lm_d$coefficients[1]
+yint_a <- lm_a$coefficients[1]
+yint_b <- lm_b$coefficients[1]
+yint_c <- lm_c$coefficients[1]
+yint_d <- lm_d$coefficients[1]
 ```
 
 

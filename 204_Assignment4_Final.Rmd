@@ -1,5 +1,5 @@
 ---
-title: "204_Assignment4_final"
+title: "ESM 204 Assignment 4 - Technical Appendix"
 author: "Bridget Gibbons, BR Hoover"
 date: "6/6/2019"
 output: html_document
@@ -20,7 +20,7 @@ carbon <- read_csv("HW4Data.csv") %>%
 
 ```
 
-1. Write down a plausible functional form for the marginal cost of abatement for sector A. Use regression analysis to estimate the parameters of that function. Repeating this for sectors B, C, and D will give you a model of the marginal cost of abatement function for each sector. How well do your models fit the data for each sector? You may need to experiment with different functional forms. Produce a plot of the estimated marginal abatement cost functions in all four sectors (this plot should go in your memo).
+###1. Marginal Costs of Abatement for Sectors A, B, C, and D.
 
 ```{r, include = FALSE}
 
@@ -78,7 +78,9 @@ Marginal Cost of Abatement Functions:
 - $$MC_C = -11.66 + 0.78 (Abatement)$$
 - $$MC_D = 9.69 + 0.26 (Abatement)$$
 
-2. Using these models and the current level of carbon emissions, derive each sector’s demand curve for carbon emissions. In other words, how much would each sector be willing to pay for the right to pollute the first unit, second unit, etc? Draw these demand curves on a graph. Which sector is willing to pay the most for the first unit of carbon emissions?
+The marginal cost of abatement for each sector was determined using linear regression models.
+
+###2. Demand Curves for Carbon Emissions for Sectors A, B, C, and D 
 
 ```{r, include = FALSE}
 #make dataframe columns for abatement, carbon emissions A, MB_A, carbon emissions B, MB_B, carbon emissions C, MB_C, carbon emissions D, MB_D
@@ -169,15 +171,15 @@ $$Demand_B = -0.2(Emissions) + 49.07 $$
 $$Demand_C =-0.78(Emissions) + 160.79 $$
 $$Demand_D = -0.26 (Emissions)+ 87.67 $$
 
-Sector C has the highest willingnesss to pay for the first unit of carbon emissions at $160.7868 per ton. 
+Sector C has the highest willingnesss to pay for the first unit of carbon emissions at $160.79 per ton. 
+
+The demand curves are related to the previously calculated marginal benefit functions. The level at which each sector is currently emitting carbon is the point at which the marginal benefit of emitting the next ton of carbon is 0. Using that relationship, the slope and intercepts of the demand curves can be calculated.
  
- 3. Now focus on country X (which contains sectors A, B, and C). Assume there are no “co-benefits” from carbon abatement (i.e. that there are no local pollutants that are affected by carbon abatement). Suppose to meet the Paris Accord commitments, country X needs to cut all carbon emissions in half. For each of the policy options listed below, derive: (1) the total cost of meeting the target in country X, (2) the cost (or benefit) to each sector, and (3) the tax revenue generated.
-  a. Cap on carbon. Each sector (A, B, and C) must cut its carbon emissions by 100 tons (thus reducing total emissions from 600 down to 300).
-  b. Tax on carbon. To emit a ton of carbon in country X, you must pay a tax of $t. You will need to find the tax that accomplishes the desired reduction.
-  c. Cap and trade. Each sector (A, B, C) is allocated carbon permits equal to their current emissions minus 100 (same as in (a) above), thus achieving the total reduction of 300. Then, these three sectors are allowed to trade with each other. You will need to derive the outcome of that trading.
+###3. Country X needs to cut emissions by half, to 300 total tons
 
 ```{r, include = FALSE}
 #cap on carbon
+
 #save y intercepts for demand curves 
 demand_a_int <- marg_benefit$demand_A[marg_benefit$abatement == 180]
 demand_b_int <- marg_benefit$demand_B[marg_benefit$abatement == 200]
@@ -199,7 +201,7 @@ marg_benefit_ag <- data.frame(marg_benefit_pollution = seq(161, 0 , -1)) %>%
     )) %>%
   mutate(ag_country_X = emissions_A + emissions_B + emissions_C)
 
-#em_A
+#emissions Sector A
 em_A_fn <- function(price){
   -price/slope_a + demand_a_int/slope_a
   
@@ -207,7 +209,7 @@ em_A_fn <- function(price){
 em_slope_a <- -1/slope_a
 em_int_a <- demand_a_int/slope_a
 
-#em_B
+#emissions Sector B
 em_B_fn <- function(price){
   -price/slope_b + demand_b_int/slope_b
   
@@ -215,7 +217,7 @@ em_B_fn <- function(price){
 em_slope_b <- -1/slope_b
 em_int_b <- demand_b_int/slope_b
 
-#em_C
+#emissions Sector C
 em_C_fn <- function(price){
   -price/slope_c + demand_c_int/slope_c
   
@@ -223,14 +225,15 @@ em_C_fn <- function(price){
 em_slope_c <- -1/slope_c
 em_int_c <- demand_c_int/slope_c
 
-#em_D
+#emissions Sector D
 em_D_fn <- function(price){
   
   -price/slope_d + demand_d_int/slope_d
 }
 em_slope_d <- -1/slope_d
 em_int_d <- demand_d_int/slope_d
-#em_ag 
+
+#Aggregate emissions 
 em_slope_ag <- em_slope_a+em_slope_b+em_slope_c
 em_int_ag <- em_int_a + em_int_b + em_int_c
 em_ag_fn <- function(price){
@@ -242,9 +245,11 @@ price_slope_ag <- function(emissions){
   
 } 
 tax <- price_slope_ag(300)
+#39.42658
 ```
 
-```{r}
+####3a. Cap on carbon emissions in which each sector needs to reduce by 100 units
+```{r, include = FALSE}
 #cap on carbon part a 
 demand_A_fn_fixed <- function(x){
   -slope_a*(x) + demand_a_int 
@@ -264,34 +269,34 @@ abated_units_A <- 100 #abated units for sector A
 abated_units_B <- 100 #abated units for sector B
 abated_units_C <- 100 #abated units for sector C
 
-##C NUMBERS WITHOUT TAX
-pollution_benefit_C <- 120*demand_C_fn_fixed(120) + 0.5*(demand_c_int - demand_C_fn_fixed(120))*120
-#13650.87 
-total_benefit_C <- integrate(demand_C_fn_fixed, 0 , 220)$value
-abatement_cost_C <- total_benefit_C - pollution_benefit_C
-#2753.63 
-
-#A NUMBERS WITHOUT TAX
+#Sector A (no tax)
 pollution_benefit_A <- 80*demand_A_fn_fixed(80) + 0.5*(demand_a_int - demand_A_fn_fixed(80))*80
 #5769.071
 total_benefit_A <- integrate(demand_A_fn_fixed, 0 , 180)$value
 abatement_cost_A <- total_benefit_A - pollution_benefit_A
 #2019.762 
 
-#B NUMBERS WITHOUT TAX
+#Sector B (no tax)
 pollution_benefit_B <- 100*demand_B_fn_fixed(100) + 0.5*(demand_b_int - demand_B_fn_fixed(100))*100
 #3912.934
 total_benefit_B <- integrate(demand_B_fn_fixed, 0 , 200)$value
 abatement_cost_B <- total_benefit_B - pollution_benefit_B
 #1925.491 
 
-######### Aggregated Costs and Benefits #########
+##Sector C (no tax)
+pollution_benefit_C <- 120*demand_C_fn_fixed(120) + 0.5*(demand_c_int - demand_C_fn_fixed(120))*120
+#13650.87 
+total_benefit_C <- integrate(demand_C_fn_fixed, 0 , 220)$value
+abatement_cost_C <- total_benefit_C - pollution_benefit_C
+#2753.63 
+
+# Aggregated Costs and Benefits
 abatement_cost_aggregated <- abatement_cost_A + abatement_cost_B + abatement_cost_C
 #6698.883
+
 pollution_benefit_aggregated <- pollution_benefit_A + pollution_benefit_B + pollution_benefit_C
 #23332.87 
 ```
-
 
 ```{r, echo = FALSE}
 par(mfrow=c(2,2)) 
@@ -309,8 +314,13 @@ lines(marg_benefit$emissions_C, marg_benefit$demand_C, main = "Sector C", xlab =
 abline(h=tax, lty= 2)
 ```
 
+With a cap on carbon emissions, Sector A will emit 80 tons of carbon, Sector B will emit 100 tons, and Sector C will emit 120 tons. Each sector will abate 100 tons of carbon as mandated.
 
-```{r}
+The cost of abatement for Sector A is 2,019.76, for Sector B is 1925.491, and for Sector C is 2,753.63. The total cost of meeting the cap of 300 tons of carbon emissions within Country X is 6,698.88. As the policy is simply a cap on emissions without an associated tax, there is no tax revenue generated.
+
+####3b. Tax on Carbon 
+
+```{r, include = FALSE}
 #3b 
 polluted_units_C_tax <- em_C_fn(tax) #polluted units for sector C
 #154.830468933185 
@@ -330,17 +340,11 @@ abated_units_B_tax <- (intercept_b - tax)/ -slope_b #abated units for sector B
 abated_units_C_tax <- (intercept_c - tax)/ -slope_c #abated units for sector C
 #65.169531066815 
 
-##C NUMBERS W TAX
-pollution_benefit_C_tax <- polluted_units_C_tax*tax + 0.5*polluted_units_C_tax*(demand_c_int-tax)
-#15499.57
-total_benefit_C_tax <- integrate(demand_C_fn, 0 , 220)$value
-abatement_cost_C_tax <- total_benefit_C - pollution_benefit_C
-#904.9294 
-
 #A NUMBERS WITH TAX
 pollution_benefit_A_tax <- polluted_units_A_tax*tax + 0.5*polluted_units_A_tax*(demand_a_int-tax)
 #6506.221 
 total_benefit_A_tax <- integrate(demand_A_fn, 0 , 180)$value
+#7788.833
 abatement_cost_A_tax <- total_benefit_A - pollution_benefit_A
 #1282.612 
 
@@ -348,10 +352,19 @@ abatement_cost_A_tax <- total_benefit_A - pollution_benefit_A
 pollution_benefit_B_tax <- polluted_units_B_tax*tax + 0.5*polluted_units_B_tax*(demand_b_int-tax)
 #2146.154
 total_benefit_B_tax <- integrate(demand_B_fn, 0 , 200)$value
+#5838.426
 abatement_cost_B_tax <- total_benefit_B - pollution_benefit_B
 #3692.271 
 
-######### Aggregated Costs and Benefits #########
+##C NUMBERS W TAX
+pollution_benefit_C_tax <- polluted_units_C_tax*tax + 0.5*polluted_units_C_tax*(demand_c_int-tax)
+#15499.57
+total_benefit_C_tax <- integrate(demand_C_fn, 0 , 220)$value
+#16404.5
+abatement_cost_C_tax <- total_benefit_C - pollution_benefit_C
+#904.9294 
+
+#Aggregated Costs and Benefits:
 abatement_cost_aggregated_tax <- abatement_cost_A_tax + abatement_cost_B_tax + abatement_cost_C_tax
 #5879.812
 
@@ -371,7 +384,17 @@ tax_revenue <- tax_revenue_A + tax_revenue_B + tax_revenue_C
 #11827.97
 ```
 
-```{r}
+If a tax is placed on each unit of carbon emitted in Country X, the optimal tax level is 39.43. 
+
+With the tax, Sector A will emit tons of carbon and abate tons. The benefit from emitting that amount of carbon is 6,506.22, and the cost of abatement is 1,282.61. The tax revenue generated from Sector A is 3,811.18.
+
+With the tax, Sector B will emit tons of carbon and abate tons. The benefit from emitting that amount of carbon is 2,146.15, and the cost of abatement is 3,692.27. The tax revenue generated from Sector A is 1,912.36.
+
+With the tax, Sector C will emit tons of carbon and abate tons. The benefit from emitting that amount of carbon is 15,499.57, and the cost of abatement is 904.93. The tax revenue generated from Sector A is 6,104.44.
+
+####3c. Cap and Trade
+
+```{r, include = FALSE}
 #3c 
 #B will sell because they get the least benefit from emitting
 #A and C will buy because they get more benefit from emitting
@@ -380,13 +403,13 @@ tax_revenue <- tax_revenue_A + tax_revenue_B + tax_revenue_C
 trading_price <- tax
 
 a_buys <- 80 - em_A_fn(tax)
-#-16.66511 
+#-16.66511 units
 
 b_sells <- 100 - em_B_fn(trading_price)
-#51.49558 
+#51.49558 units
 
 c_buys <- 120 - em_C_fn(tax)
-#-34.83047 
+#-34.83047 units
 
 c_loses <- -c_buys*tax
 #1373.246 
@@ -414,13 +437,14 @@ abated_units_C_cap <- (intercept_c - tax)/ -slope_c #abated units for sector C
 # all values stay the same except for the trading units 
 ```
 
-4. Again, without any co-benefits, suppose that country Y (which only has one carbon-emitting sector, D) has no obligation to reduce its emissions. Country X asks country Y to enter the country X carbon market. Doing so would require country Y to put a cap on carbon emissions at its current level of emissions (300 tons), but would then allow country Y to sell carbon offsets to sectors A, B, or C. Are there any incentives for country Y to enter country X’s carbon market and to thus place a voluntary cap on its emissions? Are there any incentives for country X to try to attract country Y into its market?
+Under a cap and trade scenario, the trading price for carbon emissions will be 39.43. Sector A will pollute 96.67 tons, Sector B will pollute 48.5 tons, and Sector C will pollute 154.83 tons. Sector B will sell emission credits to both Sector A and Sector C, as the marginal cost of abatement for Sector C is the lowest. Sector A will buy 16.67 credits for 657.05 and Sector C will buy 34.83 units for 1,373.25. Sector B will sell 51.5 units and gain 2,030.29.
 
+###4. Explore the inclusion of Country Y in the carbon market
 
-```{r}
+```{r, include = FALSE}
 #4
 
-#em_ag 
+#aggregate emissions 
 em_slope_ag_D <- em_slope_a+em_slope_b+em_slope_c + em_slope_d
 em_int_ag_D <- em_int_a + em_int_b + em_int_c + em_int_d
 em_ag_fn_D <- function(price){
@@ -452,42 +476,42 @@ abated_units_C_tax_4 <- (intercept_c - tax_D)/ -slope_c #abated units for sector
 abated_units_D_tax_4 <- (intercept_d - tax_D)/ -slope_d #abated units for sector D
 #77.3869
 
-##C NUMBERS W TAX AND SECTOR 4
-pollution_benefit_C_tax_4 <- polluted_units_C_4*tax_D + 0.5*polluted_units_C_4*(demand_c_int-tax_D)
-#15924.58 
-total_benefit_C_tax_4 <- integrate(demand_C_fn, 0 , 220)$value
-abatement_cost_C_tax_4 <- total_benefit_C_tax_4 - pollution_benefit_C_tax_4
-#479.9205
-
-#A NUMBERS WITH TAX AND SECTOR 4
+#Sector A
 pollution_benefit_A_tax_4 <- polluted_units_A_4*tax_D + 0.5*polluted_units_A_4*(demand_a_int-tax_D)
 #7083.733 
 total_benefit_A_tax_4 <- integrate(demand_A_fn, 0 , 180)$value
 abatement_cost_A_tax_4 <- total_benefit_A_tax_4 - pollution_benefit_A_tax_4
 #705.0993 
 
-#B NUMBERS WITH TAX AND SECTOR 4 
+#Sector B
 pollution_benefit_B_tax_4 <- polluted_units_B_4*tax_D + 0.5*polluted_units_B_4*(demand_b_int-tax_D)
 #2146.154
 total_benefit_B_tax_4 <- integrate(demand_B_fn, 0 , 200)$value
 abatement_cost_B_tax_4 <- total_benefit_B_tax_4 - pollution_benefit_B_tax_4
 #2016.081 
 
-#D NUMBERS WITH TAX AND SECTOR 4 
+##Sector C
+pollution_benefit_C_tax_4 <- polluted_units_C_4*tax_D + 0.5*polluted_units_C_4*(demand_c_int-tax_D)
+#15924.58 
+total_benefit_C_tax_4 <- integrate(demand_C_fn, 0 , 220)$value
+abatement_cost_C_tax_4 <- total_benefit_C_tax_4 - pollution_benefit_C_tax_4
+#479.9205
+
+#Sector D
 pollution_benefit_D_tax_4 <- polluted_units_D_4*tax_D + 0.5*polluted_units_D_4*(demand_d_int-tax_D)
 #13074.99 
 total_benefit_D_tax_4 <- integrate(demand_D_fn, 0 , 300)$value
 abatement_cost_D_tax_4 <- total_benefit_D_tax_4 - pollution_benefit_D_tax_4
 #1528.004 
 
-######### Aggregated Costs and Benefits #########
+# Aggregated Costs and Benefits
 abatement_cost_aggregated_tax <- abatement_cost_A_tax_4 + abatement_cost_B_tax_4 + abatement_cost_C_tax_4 + abatement_cost_D_tax_4 
 #4729.105 
 
 pollution_benefit_aggregated_tax <- pollution_benefit_A_tax_4 + pollution_benefit_B_tax_4 + pollution_benefit_C_tax_4 + pollution_benefit_D_tax_4
 #39905.64 
 
-#### CAP N TRADE PORTION 
+# cap and trade
 trading_price_4 <- tax_D
 a_buys_4 <- 80 - em_A_fn(tax_D)
 #-33.34921 
@@ -508,19 +532,26 @@ d_gains_4 <- d_sells*tax_D
 total_permit_rev_4 <- (d_gains_4 + b_gains_4) - (c_loses_4 + a_loses_4)
 ```
 
+In a carbon market that includes both Country X and Country Y, both country's emissions would be capped at 300 tons and offsets could be traded between all 4 sectors. Sectors B and D would both sell offsets, and Sectors A and C would buy offsets.
 
-5. Now assume that every ton of carbon emissions creates 1 ton of local air pollution. Local air pollution causes economic damages (health, environmental, etc.), but only in the country in which it is emitted. Assume there are no local air pollution regulations in either country X or country Y. a. In a carbon cap and trade market that only covers sectors in country X, how much local air pollution would you expect in country X? In country Y? b. If country Y enters the carbon market for country X (as in question 4 above), how much local pollution will there be in country X and country Y? c. What advice can you give country X and country Y about the desirability of allowing international trade of carbon emissions credits?
+The total cost of meeting these caps is 4,729.11 and the four sectors will benefit by 39,905.64 for being able to continue polluting to a certain extent. Sector A will emit 113.35 tons, Sector B will emit 96.93 tons, Sector C will emit 167.11 tons, and Sector D will emit 113.35 tons.
 
-a. 
-Country X produces: 300 Tons of air pollution
+Sector A will buy 33.35 offsets for 993.89. Sector B will sell 3.07 offsets and make 91.53. Sector C will buy 47.11 offsets for 1,403.96, and Sector D will sell 77.39 offsets for 2,306.32.
+
+###5. Every ton of carbon emissions creates 1 ton of local air pollution.
+
+####a. Carbon cap and trade market for Country X only
+Country X produces: 300 Tons of air pollution  
+
 Country Y produces: 300 Tons of air pollution
 
-b. 
-```{r}
+####b. Country Y enters the carbon market with Country X
+```{r, include = FALSE}
 country_x_5b <- polluted_units_A_4 + polluted_units_B_4 + polluted_units_C_4
 # 377.3869 
 country_y_5b <- polluted_units_D_4
 #222.6131 
 ```
 
-c. allowing cap and trade will lead to an increase in the tons of air pollution in country x and decrease it in country y.
+###c. 
+Allowing cap and trade will lead to an increase in the tons of air pollution in country x and decrease it in country y.
