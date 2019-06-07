@@ -318,6 +318,8 @@ With a cap on carbon emissions, Sector A will emit 80 tons of carbon, Sector B w
 
 The cost of abatement for Sector A is 2,019.76, for Sector B is 1925.491, and for Sector C is 2,753.63. The total cost of meeting the cap of 300 tons of carbon emissions within Country X is 6,698.88. As the policy is simply a cap on emissions without an associated tax, there is no tax revenue generated.
 
+Knowing that each sector needs to reduce its carbon emissions by 100 tons, it was possible to determine the amount that would each sector would need to abate. The total cost of abatement is the area under the marginal cost of abatement curve up to the total units that are abated. The benefit to the sector of still being able to emit some carbon is the area under the demand curve up to the total emitted units.
+
 ####3b. Tax on Carbon 
 
 ```{r, include = FALSE}
@@ -392,6 +394,8 @@ With the tax, Sector B will emit tons of carbon and abate tons. The benefit from
 
 With the tax, Sector C will emit tons of carbon and abate tons. The benefit from emitting that amount of carbon is 15,499.57, and the cost of abatement is 904.93. The tax revenue generated from Sector A is 6,104.44.
 
+The optimal tax level for a cabon tax policy was determined by horizontally aggregating the demand curves for each sector. The intersection of the aggregate demand with 300 total units of carbon emitted is the level of the optimal carbon tax. The intersection of that tax with the demand curve for each sector is the amount of carbon that will be emitted. The tax revenue generated is equal to the tax price multiplied by the number of units emitted by each sector. Again, the abatement cost is equal to the area under the abatement curve to the value of units abated by each sector (the difference between emissions with no tax and with the tax), and the benefit of emitting is the area under the demand curve over to the number of units emitted.
+
 ####3c. Cap and Trade
 
 ```{r, include = FALSE}
@@ -438,6 +442,8 @@ abated_units_C_cap <- (intercept_c - tax)/ -slope_c #abated units for sector C
 ```
 
 Under a cap and trade scenario, the trading price for carbon emissions will be 39.43. Sector A will pollute 96.67 tons, Sector B will pollute 48.5 tons, and Sector C will pollute 154.83 tons. Sector B will sell emission credits to both Sector A and Sector C, as the marginal cost of abatement for Sector C is the lowest. Sector A will buy 16.67 credits for 657.05 and Sector C will buy 34.83 units for 1,373.25. Sector B will sell 51.5 units and gain 2,030.29.
+
+The carbon trading price in a cap and trade scenario is equal to the optimal tax level identified in 3b. From that price it was possible to calculate the optimal number of units of carbon that each sector will emit. The difference between that level and the permits assigned under cap and trade is the number of offsets that a sector will either buy or sell, depending on their marginal price of abatement. When the abatement cost is lower than the trading price, the sector will abate and sell the offset, and when the abatement cost is higher than the trading price, the sector will purchase an offset.
 
 ###4. Explore the inclusion of Country Y in the carbon market
 
@@ -538,6 +544,8 @@ The total cost of meeting these caps is 4,729.11 and the four sectors will benef
 
 Sector A will buy 33.35 offsets for 993.89. Sector B will sell 3.07 offsets and make 91.53. Sector C will buy 47.11 offsets for 1,403.96, and Sector D will sell 77.39 offsets for 2,306.32.
 
+Because Sector D in Country Y would enter the market and has a lower marginal price of abatement for early units of carbon emissions, Sector D will sell offset permits. This was determined by aggregating the emissions curves across all 4 sectors, setting the cap, and determining the trading price for carbon emissions.
+
 ###5. Every ton of carbon emissions creates 1 ton of local air pollution.
 
 ####a. Carbon cap and trade market for Country X only
@@ -552,6 +560,9 @@ country_x_5b <- polluted_units_A_4 + polluted_units_B_4 + polluted_units_C_4
 country_y_5b <- polluted_units_D_4
 #222.6131 
 ```
+
+If country Y enters the carbon market with Country X, Country X will have 377.39 units of air pollution and Country Y will have 222.61.
+
 
 ###c. 
 Allowing cap and trade will lead to an increase in the tons of air pollution in country x and decrease it in country y.
