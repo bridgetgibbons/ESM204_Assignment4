@@ -68,7 +68,7 @@ ggplot(data = carbon_tidy, aes(x=abatement, y = mc)) + geom_point() +
   geom_smooth(method="lm", se = FALSE) +
   facet_wrap(~sector, scales = "free") +
   theme_light() +
-  labs(x = "Abatement (tons)", y = "Marginal Cost", title = "Marginal Abatement Costs") 
+  labs(x = "Abatement (tons)", y = "Marginal Cost", title = "Marginal Cost of Carbon Abatement") 
 ```
 
 Marginal Cost of Abatement Functions: 
@@ -157,10 +157,10 @@ marg_benefit <- merge(marg_benefit, demand_D, by = "row.names", all = TRUE) %>%
 ```{r, echo = FALSE}
 #plot
 par(mfrow=c(2,2)) 
-plot(marg_benefit$emissions_A, marg_benefit$demand_A, main = "Sector A", xlab = "Pollution Emitted (Tons)", ylab = "Marginal Benefit ($/Ton)", type = "l", col = "red")
-plot(marg_benefit$emissions_B, marg_benefit$demand_B, main = "Sector B", xlab = "Pollution Emitted (Tons)", ylab = "Marginal Benefit ($/Ton)", type = "l", col = "orange")
-plot(marg_benefit$emissions_C, marg_benefit$demand_C, main = "Sector C", xlab = "Pollution Emitted (Tons)", ylab = "Marginal Benefit ($/Ton)", type = "l", col = "green")
-plot(marg_benefit$emissions_D, marg_benefit$demand_D, main = "Sector D", xlab = "Pollution Emitted (Tons)", ylab = "Marginal Benefit ($/Ton)", type = "l", col = "blue")
+plot(marg_benefit$emissions_A, marg_benefit$demand_A, main = "Sector A", xlab = "Carbon Emissions (tons)", ylab = "Marginal Benefit ($/ton)", type = "l", col = "red")
+plot(marg_benefit$emissions_B, marg_benefit$demand_B, main = "Sector B", xlab = "Carbon Emissions (tons)", ylab = "Marginal Benefit ($/ton)", type = "l", col = "orange")
+plot(marg_benefit$emissions_C, marg_benefit$demand_C, main = "Sector C", xlab = "Carbon Emissions (tons)", ylab = "Marginal Benefit ($/ton)", type = "l", col = "green")
+plot(marg_benefit$emissions_D, marg_benefit$demand_D, main = "Sector D", xlab = "Carbon Emissions (tons)", ylab = "Marginal Benefit ($/ton)", type = "l", col = "blue")
 ```
 
 Demand for emission functions:
@@ -295,17 +295,17 @@ pollution_benefit_aggregated <- pollution_benefit_A + pollution_benefit_B + poll
 
 ```{r, echo = FALSE}
 par(mfrow=c(2,2)) 
-plot(marg_benefit_ag$ag_country_X, marg_benefit_ag$marg_benefit_pollution, main = "Aggregate Marginal Benefits for Country X", xlab = "Pollution Emitted (Tons)", ylab = "Marginal Benefit ($/Ton)", type = "l", col = "red")
-plot(marg_benefit$emissions_A, marg_benefit$demand_A, main = "Sector A", xlab = "Pollution Emitted (Tons)", ylab = "Marginal Benefit ($/Ton)", type = "l", col = "green")
-plot(marg_benefit$emissions_B, marg_benefit$demand_B, main = "Sector B", xlab = "Pollution Emitted (Tons)", ylab = "Marginal Benefit ($/Ton)", type = "l", col = "blue")
-plot(marg_benefit$emissions_C, marg_benefit$demand_C, main = "Sector C", xlab = "Pollution Emitted (Tons)", ylab = "Marginal Benefit ($/Ton)", type = "l", col = "orange")
+plot(marg_benefit_ag$ag_country_X, marg_benefit_ag$marg_benefit_pollution, main = "Country X Aggregated Marginal Benefits", xlab = "Carbon Emissions (Tons)", ylab = "Marginal Benefit ($/Ton)", type = "l", col = "red")
+plot(marg_benefit$emissions_A, marg_benefit$demand_A, main = "Sector A", xlab = "Carbon Emissions (Tons)", ylab = "Marginal Benefit ($/Ton)", type = "l", col = "green")
+plot(marg_benefit$emissions_B, marg_benefit$demand_B, main = "Sector B", xlab = "Carbon Emissions (Tons)", ylab = "Marginal Benefit ($/Ton)", type = "l", col = "blue")
+plot(marg_benefit$emissions_C, marg_benefit$demand_C, main = "Sector C", xlab = "Carbon Emissions (Tons)", ylab = "Marginal Benefit ($/Ton)", type = "l", col = "orange")
 ```
 
 ```{r, echo = FALSE}
-plot(marg_benefit_ag$ag_country_X, marg_benefit_ag$marg_benefit_pollution, main = "Aggregate Marginal Benefits for Country X", xlab = "Pollution Emitted (Tons)", ylab = "Marginal Benefit ($/Ton)", type = "l", col = "red")
-lines(marg_benefit$emissions_A, marg_benefit$demand_A, main = "Sector A", xlab = "Pollution Emitted (Tons)", ylab = "Marginal Benefit ($/Ton)", type = "l", col = "green")
-lines(marg_benefit$emissions_B, marg_benefit$demand_B, main = "Sector B", xlab = "Pollution Emitted (Tons)", ylab = "Marginal Benefit ($/Ton)", type = "l", col = "blue")
-lines(marg_benefit$emissions_C, marg_benefit$demand_C, main = "Sector C", xlab = "Pollution Emitted (Tons)", ylab = "Marginal Benefit ($/Ton)", type = "l", col = "orange")
+plot(marg_benefit_ag$ag_country_X, marg_benefit_ag$marg_benefit_pollution, main = "Country X Aggregated Marginal Benefits", xlab = "Carbon Emissions (Tons)", ylab = "Marginal Benefit ($/Ton)", type = "l", col = "red")
+lines(marg_benefit$emissions_A, marg_benefit$demand_A, main = "Sector A", xlab = "Carbon Emissions (Tons)", ylab = "Marginal Benefit ($/Ton)", type = "l", col = "green")
+lines(marg_benefit$emissions_B, marg_benefit$demand_B, main = "Sector B", xlab = "Carbon Emissions (Tons)", ylab = "Marginal Benefit ($/Ton)", type = "l", col = "blue")
+lines(marg_benefit$emissions_C, marg_benefit$demand_C, main = "Sector C", xlab = "Carbon Emissions (Tons)", ylab = "Marginal Benefit ($/Ton)", type = "l", col = "orange")
 abline(h=tax, lty= 2)
 ```
 
